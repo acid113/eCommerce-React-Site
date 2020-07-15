@@ -1,13 +1,14 @@
-import React, {useState, useEffect} from 'react';
+import React, {FC, useState, useEffect} from 'react';
 import {Redirect} from 'react-router-dom';
 import Layout from '../core/Layout';
 
 // eslint-disable-next-line no-unused-vars
-import {ISignInValues, SignInUser, AuthenticateUser} from '../auth/index';
+import {ISignInValues, SignInUser, AuthenticateUser, GetUserProfile} from '../auth/apiAuth';
+import {IsUserAuthenticated} from '../auth/apiAuth';
 
-const SignIn = () => {
+const SignIn: FC = () => {
 	const [formValues, setFormValues] = useState<ISignInValues>({
-		email: 'nata@abc1.com',
+		email: 'nata@abc2.com',
 		password: 'pass123'
 	});
 
@@ -15,7 +16,7 @@ const SignIn = () => {
 	const [errorFound, setErrorFound] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [isLoading, setLoading] = useState(false);
-	const [isUserValidated, setUserValidated] = useState(false);
+	const [isUserValidated, setUserValidated] = useState(false); // * replace with Context API?
 
 	const showError = () => {
 		return (
@@ -38,8 +39,29 @@ const SignIn = () => {
 	};
 
 	const redirectUser = () => {
+		console.log('isUserValidated: ', isUserValidated);
+
+		// ? workaround to redirect user to homepage if user is currently logged in
+		// if (IsUserAuthenticated()) return <Redirect to="/" />;
+
 		if (isUserValidated) {
-			return <Redirect to="/" />;
+			const {
+				user: {role}
+			} = GetUserProfile();
+
+			switch (role) {
+				case 0:
+					console.log('inside SignIn, redirect to user dashboard');
+					return <Redirect to="/user/dashboard" />;
+
+				case 1:
+					console.log('inside SignIn, redirect to admin dashboard');
+					return <Redirect to="/admin/dashboard" />;
+
+				default:
+					console.log('inside SignIn, redirect to home');
+					return <Redirect to="/" />;
+			}
 		}
 	};
 

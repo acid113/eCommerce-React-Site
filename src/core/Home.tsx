@@ -1,7 +1,7 @@
-import React, {useEffect} from 'react';
+import React, {FC, useEffect} from 'react';
 import Layout from '../core/Layout';
 
-const Home = () => {
+const Home: FC = () => {
 	useEffect(() => {
 		console.log('inside Home');
 	}, []);

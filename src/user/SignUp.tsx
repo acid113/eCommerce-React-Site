@@ -1,11 +1,11 @@
-import React, {useState, useEffect} from 'react';
+import React, {FC, useState, useEffect} from 'react';
 import {Link} from 'react-router-dom';
 import Layout from '../core/Layout';
 
 // eslint-disable-next-line no-unused-vars
-import {ISignUpValues, SignUpUser} from '../auth/index';
+import {ISignUpValues, SignUpUser} from '../auth/apiAuth';
 
-const SignUp = () => {
+const SignUp: FC = () => {
 	const [formValues, setFormValues] = useState<ISignUpValues>({
 		name: '',
 		email: '',

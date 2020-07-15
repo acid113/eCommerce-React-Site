@@ -78,16 +78,28 @@ export const AuthenticateUser = (data: any, callback: () => void) => {
 	}
 };
 
-export const IsUserAuthenticated = (): boolean => {
+export const IsUserAuthenticated = () => {
 	if (typeof window == 'undefined') {
 		return false;
 	}
 
 	if (localStorage.getItem(USER_PROFILE)) {
 		console.log('user is authenticated');
-		return true;
+		const profile = localStorage.getItem(USER_PROFILE);
+		if (profile) return true;
+
+		return false;
 	}
 
 	console.log('user is not authenticated');
 	return false;
+};
+
+export const GetUserProfile = () => {
+	if (localStorage.getItem(USER_PROFILE)) {
+		const profile = localStorage.getItem(USER_PROFILE);
+
+		if (profile) return JSON.parse(profile);
+		else return null;
+	}
 };

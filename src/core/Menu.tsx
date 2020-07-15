@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link, withRouter} from 'react-router-dom';
 
-import {SignOutUser, IsUserAuthenticated} from '../auth/index';
+import {SignOutUser, IsUserAuthenticated, GetUserProfile} from '../auth/apiAuth';
 
 interface IMenuProps {
 	history: any;
@@ -19,6 +19,17 @@ const isActive = (history: any, path: string) => {
 // const Menu = ({history}) => {
 const Menu = (props: IMenuProps) => {
 	const {history} = props;
+	const isUserAuthenticated = IsUserAuthenticated(); // TODO: use ContextAPI
+	let isAdminRole = false;
+
+	if (isUserAuthenticated) {
+		const {
+			user: {role}
+		} = GetUserProfile();
+
+		isAdminRole = role === 1;
+	}
+
 	return (
 		<nav className="navbar navbar-expand-sm bg-primary">
 			<ul className="navbar-nav">
@@ -27,7 +38,21 @@ const Menu = (props: IMenuProps) => {
 						Home
 					</Link>
 				</li>
-				{!IsUserAuthenticated() && (
+				<li className="nav-item">
+					{isAdminRole ? (
+						<Link className="nav-link" to="/admin/dashboard" style={isActive(history, '/admin/dashboard')}>
+							Dashboard
+						</Link>
+					) : (
+						<Link className="nav-link" to="/user/dashboard" style={isActive(history, '/user/dashboard')}>
+							Dashboard
+						</Link>
+					)}
+					{/* <Link className="nav-link" to="/user/dashboard" style={isActive(history, '/user/dashboard')}>
+						Dashboard
+					</Link> */}
+				</li>
+				{!isUserAuthenticated && (
 					<>
 						<li className="nav-item">
 							<Link className="nav-link" to="/signin" style={isActive(history, '/signin')}>
@@ -42,7 +67,7 @@ const Menu = (props: IMenuProps) => {
 					</>
 				)}
 
-				{IsUserAuthenticated() && (
+				{isUserAuthenticated && (
 					<>
 						<li className="nav-item">
 							<span
