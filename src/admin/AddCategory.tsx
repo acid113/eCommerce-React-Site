@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom';
 import Layout from '../core/Layout';
 
 import {GetUserProfile} from '../auth/apiAuth';
-import {CreateCategory} from './apiAdmin';
+import {createCategory} from './apiAdmin';
 
 const AddCategory: FC = () => {
 	const [categoryName, setCategoryName] = useState('');
@@ -25,7 +25,7 @@ const AddCategory: FC = () => {
 
 		// console.log('AddCategory > submitForm() > category input: ', category);
 
-		CreateCategory(_id, token, categoryName).then((response) => {
+		createCategory(_id, token, categoryName).then((response) => {
 			// console.log('response: ', response);
 			if (response.error) {
 				console.log('error returned by API: ', response.error);
@@ -35,6 +35,7 @@ const AddCategory: FC = () => {
 			} else {
 				setErrorMessage('');
 				setIsSuccess(true);
+				setCategoryName('');
 			}
 		});
 	};

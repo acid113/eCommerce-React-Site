@@ -24,14 +24,6 @@ const generateHttpHeader = (token: string) => {
 	};
 };
 
-const generateHttpHeaderFormDataInput = (token: string) => {
-	return {
-		Accept: 'application/json;odata=verbose',
-		'Content-Type': 'multipart/form-data',
-		Authorization: `Bearer ${token}`
-	};
-};
-
 const generateHttpHeaderJsonInput = (token: string) => {
 	return {
 		Accept: 'application/json;odata=verbose',
@@ -40,7 +32,7 @@ const generateHttpHeaderJsonInput = (token: string) => {
 	};
 };
 
-export const CreateCategory = (userId: string, token: string, category: string): Promise<any> => {
+export const createCategory = (userId: string, token: string, category: string): Promise<any> => {
 	console.log('CreateCategory() input: ', category);
 
 	// * API accepts 'name' input
@@ -64,12 +56,27 @@ export const CreateCategory = (userId: string, token: string, category: string):
 		});
 };
 
-export const CreateProduct = (userId: string, token: string, product: FormData): Promise<any> => {
+export const getCategories = () => {
+	console.log('getting category list');
+
+	return fetch(`${API}/categories`)
+		.then((response) => {
+			return response.json();
+		})
+		.catch((err) => {
+			console.log('API call error: ', err);
+			return JSON.stringify({
+				error: err
+			});
+		});
+};
+
+export const createProduct = (userId: string, token: string, product: FormData): Promise<any> => {
 	console.log('CreateProduct() input: ', product);
 
 	return fetch(`${API}/product/create/${userId}`, {
 		method: 'POST',
-		headers: generateHttpHeaderFormDataInput(token),
+		headers: generateHttpHeader(token),
 		body: product
 	})
 		.then((response) => {

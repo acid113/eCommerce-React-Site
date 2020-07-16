@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom';
 import Layout from '../core/Layout';
 
 import {GetUserProfile} from '../auth/apiAuth';
-import {IProductInput, CreateProduct} from './apiAdmin';
+import {IProductInput, createProduct, getCategories} from './apiAdmin';
 
 const AddProduct: FC = () => {
 	const [formValues, setFormValues] = useState<IProductInput>({
@@ -18,15 +18,18 @@ const AddProduct: FC = () => {
 		formData: new FormData()
 	});
 
-	const {name, description, price, category, quantity, sold, shipping, formData} = formValues;
+	const {name, description, price, quantity, formData} = formValues;
 	const [errorMessage, setErrorMessage] = useState('');
 	const [isSuccess, setIsSuccess] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const [categories, setCategories] = useState([]);
+	const [newProduct, setNewProduct] = useState('');
 
 	const showSuccess = () => {
 		if (isSuccess) {
 			return (
 				<>
-					<h3 className="text-success">{name} product is created</h3>
+					<h3 className="alert alert-info">{newProduct} is created</h3>
 				</>
 			);
 		}
@@ -36,7 +39,7 @@ const AddProduct: FC = () => {
 		if (errorMessage) {
 			return (
 				<>
-					<h3 className="text-danger">{errorMessage}</h3>
+					<h3 className="alert alert-danger">{errorMessage}</h3>
 				</>
 			);
 		}
@@ -52,22 +55,27 @@ const AddProduct: FC = () => {
 
 	const clearForm = () => {
 		console.log('clear form');
-		setFormValues({...formValues, name: '', description: '', price: 0, category: null, quantity: 0, photo: null, shipping: false});
+		setFormValues({
+			...formValues,
+			name: '',
+			description: '',
+			price: 0,
+			category: null,
+			quantity: 0,
+			photo: null,
+			shipping: false
+		});
 	};
-
-	useEffect(() => {
-		// ? might not be needed
-		// setFormValues({...formValues, formData: new FormData()});
-	}, []);
 
 	const handleChange = (fieldName: string) => (e: any) => {
 		const fieldValue = fieldName === 'photo' ? e.target.files[0] : e.target.value;
 
 		// setIsSuccess(false);
 		setErrorMessage('');
-		setFormValues({...formValues, [fieldName]: fieldValue});
 		formData.set(fieldName, fieldValue);
-		console.log(`form value of '${fieldName}': ${fieldValue}`);
+		setFormValues({...formValues, [fieldName]: fieldValue});
+
+		// console.log(`form value of '${fieldName}': ${fieldValue}`);
 		// console.log('form values :', formValues);
 	};
 
@@ -77,7 +85,39 @@ const AddProduct: FC = () => {
 			token,
 			user: {_id}
 		} = GetUserProfile();
+
+		setIsLoading(true);
+
+		createProduct(_id, token, formData).then((response) => {
+			setIsLoading(false);
+			if (response.error) {
+				console.log('error returned by API: ', response.error);
+
+				setErrorMessage(response.error);
+				setIsSuccess(false);
+			} else {
+				console.log('success creating new product: ', response.name);
+				setErrorMessage('');
+				setIsSuccess(true);
+				setNewProduct(response.name);
+				clearForm();
+			}
+		});
 	};
+
+	const getCategoryList = () => {
+		getCategories().then((response) => {
+			// console.log(response);
+			setCategories(response);
+		});
+	};
+
+	useEffect(() => {
+		// ? might not be needed
+		// setFormValues({...formValues, formData: new FormData()});
+
+		getCategoryList();
+	}, []);
 
 	const newProductForm = () => {
 		return (
@@ -93,7 +133,7 @@ const AddProduct: FC = () => {
 				</div>
 
 				<div className="form-group">
-					<label className="btn btn-outline-secondary">
+					<label className="btn btn-secondary">
 						Photo: <input id="photo" name="photo" type="file" accept="image/*" onChange={handleChange('photo')} />
 					</label>
 				</div>
@@ -101,9 +141,13 @@ const AddProduct: FC = () => {
 				<div className="form-group">
 					<label className="text-muted">Category</label>
 					<select id="category" className="form-control" onChange={handleChange('category')} defaultValue="">
-						<option value=""> None</option>
-						<option value="5ee73beb0a93e957306e9236">Category A</option>
-						<option value="5ee745b711a6151cd022a96e">Category B</option>
+						<option>Select</option>
+						{categories &&
+							categories.map((category: any, index: number) => (
+								<option key={index} value={category._id}>
+									{category.name}
+								</option>
+							))}
 					</select>
 				</div>
 
@@ -119,15 +163,6 @@ const AddProduct: FC = () => {
 
 				<div className="form-group">
 					<label className="text-muted">Shipping</label>
-					{/* <select id="shipping" className="form-control" onChange={handleChange('shipping')} defaultValue={0}>
-						<option value={0}>False</option>
-						<option value={1}>True</option>
-					</select> */}
-					{/* <input type="radio" id="shipping" name="shipping" value={0} onClick={handleChange('shipping')} />
-					<label>False</label>
-					<input type="radio" id="shipping" name="shipping" value={1} onClick={handleChange('shipping')} />
-					<label>True</label> */}
-
 					<div className="radio">
 						<label>
 							<input type="radio" name="shipping" value={1} onClick={handleChange('shipping')} />
