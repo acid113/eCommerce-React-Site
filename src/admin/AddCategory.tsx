@@ -7,6 +7,7 @@ import {createCategory} from './apiAdmin';
 
 const AddCategory: FC = () => {
 	const [categoryName, setCategoryName] = useState('');
+	const [createdCategoryName, setCreatedCategoryName] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [isSuccess, setIsSuccess] = useState(false);
 
@@ -29,12 +30,14 @@ const AddCategory: FC = () => {
 			// console.log('response: ', response);
 			if (response.error) {
 				console.log('error returned by API: ', response.error);
-				// setErrorMessage(JSON.stringify(response.error));
 				setErrorMessage('Category name should be unique.');
 				setIsSuccess(false);
 			} else {
 				setErrorMessage('');
 				setIsSuccess(true);
+
+				// ? needed to extract data in 'response.data', NOT 'response'
+				setCreatedCategoryName(response.data.name);
 				setCategoryName('');
 			}
 		});
@@ -59,7 +62,7 @@ const AddCategory: FC = () => {
 		if (isSuccess) {
 			return (
 				<>
-					<h3 className="text-success">{categoryName} category is created</h3>
+					<h3 className="text-success">{createdCategoryName} category is created</h3>
 				</>
 			);
 		}

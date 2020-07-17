@@ -3,7 +3,9 @@ import {Link} from 'react-router-dom';
 import Layout from '../core/Layout';
 
 import {GetUserProfile} from '../auth/apiAuth';
-import {IProductInput, createProduct, getCategories} from './apiAdmin';
+import {createProduct, getCategories} from './apiAdmin';
+import {IProductInput} from '../models/InputInterfaces';
+import {IProductOutput, ICategoryOutput} from '../models/OutputInterfaces';
 
 const AddProduct: FC = () => {
 	const [formValues, setFormValues] = useState<IProductInput>({
@@ -22,7 +24,7 @@ const AddProduct: FC = () => {
 	const [errorMessage, setErrorMessage] = useState('');
 	const [isSuccess, setIsSuccess] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const [categories, setCategories] = useState([]);
+	const [categories, setCategories] = useState<ICategoryOutput[]>([]);
 	const [newProduct, setNewProduct] = useState('');
 
 	const showSuccess = () => {
@@ -88,7 +90,7 @@ const AddProduct: FC = () => {
 
 		setIsLoading(true);
 
-		createProduct(_id, token, formData).then((response) => {
+		createProduct(_id, token, formData).then((response: IProductOutput) => {
 			setIsLoading(false);
 			if (response.error) {
 				console.log('error returned by API: ', response.error);
@@ -106,7 +108,7 @@ const AddProduct: FC = () => {
 	};
 
 	const getCategoryList = () => {
-		getCategories().then((response) => {
+		getCategories().then((response: ICategoryOutput[]) => {
 			// console.log(response);
 			setCategories(response);
 		});
@@ -143,7 +145,7 @@ const AddProduct: FC = () => {
 					<select id="category" className="form-control" onChange={handleChange('category')} defaultValue="">
 						<option>Select</option>
 						{categories &&
-							categories.map((category: any, index: number) => (
+							categories.map((category, index: number) => (
 								<option key={index} value={category._id}>
 									{category.name}
 								</option>

@@ -79,12 +79,13 @@ export const AuthenticateUser = (data: any, callback: () => void) => {
 };
 
 export const IsUserAuthenticated = () => {
+	// ! looks like this is called too many times
 	if (typeof window == 'undefined') {
 		return false;
 	}
 
 	if (localStorage.getItem(USER_PROFILE)) {
-		console.log('user is authenticated');
+		// console.log('user is authenticated');
 		const profile = localStorage.getItem(USER_PROFILE);
 		if (profile) return true;
 

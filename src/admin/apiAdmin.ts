@@ -1,43 +1,27 @@
 import {API} from '../config/config';
 
-// TODO: use interface
-// export interface ICategoryInput {
-// 	name: string;
-// }
-
-export interface IProductInput {
-	name: string;
-	description: string;
-	price: number;
-	category: any;
-	quantity: number;
-	sold: number;
-	photo: any;
-	shipping: boolean;
-	formData: FormData; // * this is because we're passing form-data, not json
-}
-
-const generateHttpHeader = (token: string) => {
-	return {
+const generateHttpHeader = (token: string): Headers => {
+	return new Headers({
 		Accept: 'application/json;odata=verbose',
 		Authorization: `Bearer ${token}`
-	};
+	});
 };
 
-const generateHttpHeaderJsonInput = (token: string) => {
-	return {
+const generateHttpHeaderJsonInput = (token: string): Headers => {
+	return new Headers({
 		Accept: 'application/json;odata=verbose',
 		'Content-Type': 'application/json',
 		Authorization: `Bearer ${token}`
-	};
+	});
 };
 
-export const createCategory = (userId: string, token: string, category: string): Promise<any> => {
-	console.log('CreateCategory() input: ', category);
+// export const createCategory = (dataInput: ICategoryInput): Promise<any> => {
+export const createCategory = (userId: string, token: string, categoryName: string): Promise<any> => {
+	console.log('CreateCategory() input: ', categoryName);
 
 	// * API accepts 'name' input
 	const categoryInput = {
-		name: category
+		name: categoryName
 	};
 
 	return fetch(`${API}/category/create/${userId}`, {
