@@ -15,3 +15,17 @@ export const getProducts = (sortBy: string) => {
 			});
 		});
 };
+
+// * copied from /admin/apiAdmin.ts
+export const getCategories = () => {
+	return fetch(`${API}/categories`)
+		.then((response) => {
+			return response.json();
+		})
+		.catch((err) => {
+			console.log('API call error: ', err);
+			return JSON.stringify({
+				error: err
+			});
+		});
+};

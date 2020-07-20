@@ -39,6 +39,12 @@ const Menu = (props: IMenuProps) => {
 					</Link>
 				</li>
 				<li className="nav-item">
+					<Link className="nav-link" to="/shop" style={isActive(history, '/shop')}>
+						Shop
+					</Link>
+				</li>
+
+				<li className="nav-item">
 					{isAdminRole ? (
 						<Link className="nav-link" to="/admin/dashboard" style={isActive(history, '/admin/dashboard')}>
 							Dashboard

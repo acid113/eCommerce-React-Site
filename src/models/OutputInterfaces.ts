@@ -14,5 +14,4 @@ export interface IProductOutput {
 export interface ICategoryOutput {
 	_id: string;
 	name: string;
-	error?: string;
 }
