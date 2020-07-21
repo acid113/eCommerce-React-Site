@@ -92,7 +92,7 @@ export const IsUserAuthenticated = () => {
 		return false;
 	}
 
-	console.log('user is not authenticated');
+	// console.log('user is not authenticated');
 	return false;
 };
 

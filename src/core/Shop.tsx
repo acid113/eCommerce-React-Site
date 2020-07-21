@@ -7,14 +7,33 @@ import {getCategories, getProducts} from './apiCore';
 import {ICategoryOutput, IProductOutput} from '../models/OutputInterfaces';
 import CheckboxList from '../shared/CheckboxList';
 
+import {PriceRange} from './fixedPrices';
+import RadioboxList, {IPriceList} from '../shared/PriceRangeList';
+
+interface ICurrentFilter {
+	filters: {
+		category?: string[];
+		price?: number[]; // ! should be number
+	};
+}
+
 const Shop = () => {
 	const [products, setProducts] = useState<IProductOutput[]>([]);
 	const [categories, setCategories] = useState<ICategoryOutput[]>([]);
+	const [priceRange, setPriceRange] = useState<IPriceList[]>([]);
 	const [errorMessage, setErrorMessage] = useState('');
 	// const [isSuccess, setIsSuccess] = useState(false);
 	// const [isLoading, setIsLoading] = useState(false);
 
-	const loadCategoryList = () => {
+	// const [currentFilter, setCurrentFilter] = useState<any>({
+	const [currentFilter, setCurrentFilter] = useState<ICurrentFilter>({
+		filters: {
+			category: [],
+			price: []
+		}
+	});
+
+	const loadCategoryFilterList = () => {
 		getCategories().then((response) => {
 			// console.log(response);
 			if (response.error) {
@@ -23,6 +42,10 @@ const Shop = () => {
 				setCategories(response);
 			}
 		});
+	};
+
+	const loadPriceRangeFilterList = () => {
+		setPriceRange(PriceRange);
 	};
 
 	const loadProductList = () => {
@@ -35,17 +58,29 @@ const Shop = () => {
 		});
 	};
 
-	const displayCategoryList = () => {
+	const displayCategoryFilters = () => {
 		if (categories.length > 0) {
 			return (
 				<>
 					<h4>Filter by category</h4>
 					<ul>
-						<CheckboxList items={categories} />
+						<CheckboxList items={categories} handleFilters={(categories) => handleSelectedFilter(categories, 'category')} />
 					</ul>
 				</>
 			);
 		}
+	};
+
+	const displayPriceRangeFilters = () => {
+		return (
+			<>
+				<h4>Filter by price range</h4>
+				<div>
+					{/* how did this work with 'any' type? */}
+					<RadioboxList items={priceRange} handleFilters={(priceId) => handleSelectedFilter(priceId, 'price')} />
+				</div>
+			</>
+		);
 	};
 
 	const displayProductList = () => {
@@ -59,8 +94,42 @@ const Shop = () => {
 		}
 	};
 
+	const getPriceRangeValue = (priceId: number): number[] => {
+		let selectedRange: number[] = [];
+
+		priceRange.filter((price) => {
+			if (price._id === priceId) {
+				// console.log('price range found: ', price.range);
+				selectedRange = price.range;
+			}
+		});
+
+		return selectedRange;
+	};
+
+	const handleSelectedFilter = (filterData: string[], filterBy: string) => {
+		// console.log(`Shop filter by "${filterBy}": ${filterData}`);
+		const newFilters = {...currentFilter};
+
+		// ! error if you use ICurrentFilter
+		// newFilters.filters[filterBy] = filterData;
+
+		if (filterBy === 'category') {
+			newFilters.filters.category = filterData;
+		}
+
+		if (filterBy === 'price') {
+			// ? While expected 'filterData' param is of type string[], here it's a single string value
+			newFilters.filters.price = getPriceRangeValue(parseInt(filterData.toString()));
+		}
+
+		setCurrentFilter(newFilters);
+		console.log('current filter: ', JSON.stringify(currentFilter));
+	};
+
 	useEffect(() => {
-		loadCategoryList();
+		loadCategoryFilterList();
+		loadPriceRangeFilterList();
 		loadProductList();
 	}, []);
 
@@ -68,7 +137,10 @@ const Shop = () => {
 		<>
 			<Layout title="Shop Page" description="Search and find products of your choice" className="container-fluid">
 				<div className="row">
-					<div className="col-4">{displayCategoryList()}</div>
+					<div className="col-4">
+						{displayCategoryFilters()}
+						{displayPriceRangeFilters()}
+					</div>
 					<div className="col-8">{displayProductList()}</div>
 				</div>
 			</Layout>
