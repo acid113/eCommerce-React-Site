@@ -2,13 +2,12 @@ import React, {FC, useEffect, useState} from 'react';
 
 import Layout from '../core/Layout';
 import Card from '../core/Card';
-
-import {getCategories, getProducts} from './apiCore';
-import {ICategoryOutput, IProductOutput} from '../models/OutputInterfaces';
 import CheckboxList from '../shared/CheckboxList';
-
-import {PriceRange} from './fixedPrices';
 import RadioboxList, {IPriceList} from '../shared/PriceRangeList';
+
+import {ICategoryOutput, IProductOutput} from '../models/OutputInterfaces';
+import {PriceRange} from './fixedPrices';
+import {getCategories, getFilteredProducts} from './apiCore';
 
 interface ICurrentFilter {
 	filters: {
@@ -22,6 +21,9 @@ const Shop = () => {
 	const [categories, setCategories] = useState<ICategoryOutput[]>([]);
 	const [priceRange, setPriceRange] = useState<IPriceList[]>([]);
 	const [errorMessage, setErrorMessage] = useState('');
+	const [itemDisplayCount, setItemDisplayCount] = useState(3);
+	const [skip, setSkip] = useState(0);
+	const [itemsReturnCount, setItemsReturnCount] = useState(0);
 	// const [isSuccess, setIsSuccess] = useState(false);
 	// const [isLoading, setIsLoading] = useState(false);
 
@@ -35,7 +37,6 @@ const Shop = () => {
 
 	const loadCategoryFilterList = () => {
 		getCategories().then((response) => {
-			// console.log(response);
 			if (response.error) {
 				setErrorMessage(response.error);
 			} else {
@@ -48,12 +49,30 @@ const Shop = () => {
 		setPriceRange(PriceRange);
 	};
 
-	const loadProductList = () => {
-		getProducts('createdAt').then((response) => {
+	const loadProductList = (filter: ICurrentFilter) => {
+		// console.log('loadProductList() called: ', filter);
+		getFilteredProducts(skip, itemDisplayCount, filter.filters).then((response) => {
 			if (response.error) {
 				setErrorMessage(response.error);
 			} else {
-				setProducts(response);
+				setProducts(response.data);
+				setItemsReturnCount(response.size);
+				setSkip(0);
+			}
+		});
+	};
+
+	const loadMoreProducts = () => {
+		const toSkip = skip + itemDisplayCount;
+		getFilteredProducts(toSkip, itemDisplayCount, currentFilter).then((response) => {
+			if (response.error) {
+				setErrorMessage(response.error);
+			} else {
+				console.log('loadMoreProducts() size: ', response.size);
+				console.log(response.data);
+				setProducts([...products, ...response.data]);
+				setItemsReturnCount(response.size);
+				setSkip(toSkip);
 			}
 		});
 	};
@@ -94,6 +113,18 @@ const Shop = () => {
 		}
 	};
 
+	const displayLoadMoreButton = () => {
+		return (
+			<>
+				{itemsReturnCount > 0 && itemsReturnCount >= itemDisplayCount && (
+					<button onClick={loadMoreProducts} className="btn btn-warning mb-5">
+						Load More
+					</button>
+				)}
+			</>
+		);
+	};
+
 	const getPriceRangeValue = (priceId: number): number[] => {
 		let selectedRange: number[] = [];
 
@@ -124,13 +155,15 @@ const Shop = () => {
 		}
 
 		setCurrentFilter(newFilters);
-		console.log('current filter: ', JSON.stringify(currentFilter));
+		// console.log('current filter: ', JSON.stringify(currentFilter));
+
+		loadProductList(newFilters);
 	};
 
 	useEffect(() => {
 		loadCategoryFilterList();
 		loadPriceRangeFilterList();
-		loadProductList();
+		loadProductList(currentFilter);
 	}, []);
 
 	return (
@@ -141,7 +174,11 @@ const Shop = () => {
 						{displayCategoryFilters()}
 						{displayPriceRangeFilters()}
 					</div>
-					<div className="col-8">{displayProductList()}</div>
+					<div className="col-8">
+						{displayProductList()}
+						<hr />
+						{displayLoadMoreButton()}
+					</div>
 				</div>
 			</Layout>
 		</>
