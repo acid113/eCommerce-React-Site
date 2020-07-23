@@ -1,4 +1,5 @@
 import {API} from '../config/config';
+import queryString from 'query-string';
 
 // TODO: shared function
 const generateHttpHeader = () => {
@@ -39,6 +40,23 @@ export const getFilteredProducts = (skip: number, limit: number, filters: any) =
 		headers: generateHttpHeader(),
 		body: JSON.stringify(data)
 	})
+		.then((response) => {
+			return response.json();
+		})
+		.catch((err) => {
+			console.log('API call error: ', err);
+			return JSON.stringify({
+				error: err
+			});
+		});
+};
+
+export const list = (params: any) => {
+	const query = queryString.stringify(params); // * Note: will need to install 'query-string'
+	const url = `${API}/products/search?${query}`;
+	// console.log('url: ', url);
+
+	return fetch(url)
 		.then((response) => {
 			return response.json();
 		})

@@ -1,6 +1,7 @@
 import React, {FC, useEffect, useState} from 'react';
 import Layout from '../core/Layout';
 import Card from '../core/Card';
+import Search from '../core/Search';
 
 import {getProducts} from './apiCore';
 import {IProductOutput} from '../models/OutputInterfaces';
@@ -68,6 +69,7 @@ const Home: FC = () => {
 	return (
 		<>
 			<Layout title="Home Page" description="React (Typescript) E-Commerce App" className="container-fluid">
+				<Search />
 				{displayNewArrivals()}
 				{displayBestSellers()}
 			</Layout>
