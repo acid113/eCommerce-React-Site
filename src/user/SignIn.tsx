@@ -112,12 +112,16 @@ const SignIn: FC = () => {
 		return (
 			<form onSubmit={submitForm}>
 				<div className="form-group">
-					<label className="text-muted">Email</label>
+					<label className="text-muted" htmlFor="email">
+						Email
+					</label>
 					<input id="email" value={email} type="email" className="form-control" onChange={handleChange} />
 				</div>
 
 				<div className="form-group">
-					<label className="text-muted">Password</label>
+					<label className="text-muted" htmlFor="password">
+						Password
+					</label>
 					<input id="password" value={password} type="password" className="form-control" onChange={handleChange} />
 				</div>
 				<button type="submit" className="btn btn-primary">
